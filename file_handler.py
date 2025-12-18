@@ -1,3 +1,4 @@
+import csv
 def read_csv_file(file_path, dtypes:dict):
     """
     Read a CSV file and convert each column to the specified data type.
@@ -11,7 +12,29 @@ def read_csv_file(file_path, dtypes:dict):
               Missing values (empty strings) are replaced with None.
     
     """
-    pass
+    with open(file_path, mode = 'r') as file :
+      rows = file.readlines()
+      values = [row.split(',') for row in rows[1:]]
+    output = {col:[] for col in dtypes.keys()}
+    for row in values :
+      for dt , key , value in zip(dtypes.values() , dtypes.keys() , row):
+        if value.strip()=='':
+          output[key].append(None)
+          continue
+        if dt=='string':
+          output[key].append(str(value).replace('"' , '').strip())
+        elif dt=='float':
+          output[key].append(float(value))
+        elif dt=='int':
+          output[key].append(int(value))
+    return output
+
+
+
+
+
+
+
 
 def read_dtype(file_path):
     """
@@ -23,7 +46,12 @@ def read_dtype(file_path):
     Returns:
         dict: A dictionary where keys are column names and values are data types ('int', 'float', 'string').
     """
-    pass
+    with open(file_path, mode='r') as file:
+        rows = file.readlines()[1:]
+        output = {row.split(',')[0].strip(): row.split(',')[1].strip() for row in rows}
+
+
+    return output
             
 def write_file(file_path, data:dict):
     """
@@ -36,4 +64,19 @@ def write_file(file_path, data:dict):
     Returns:
         None
     """
-    pass
+
+
+    with open(file_path, 'w', newline='') as f:
+        writer = csv.writer(f)
+
+
+        writer.writerow(data.keys())
+
+        if not data:
+            return
+
+        num_rows = len(list(data.values())[0])
+
+        for i in range(num_rows):
+            row_values = [data[key][i] for key in data.keys()]
+            writer.writerow(row_values)
